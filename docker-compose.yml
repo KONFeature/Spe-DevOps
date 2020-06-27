@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  # Jenkins imqge (Build artifact, send them to sonar, and to nexus, maybe triggered by gitlab ?)
+  jenkins:
+    image: jenkins/jenkins
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+
+volumes:
+  jenkins-data:
