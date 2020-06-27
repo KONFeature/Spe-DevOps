@@ -5,6 +5,7 @@ services:
   jenkins:
     image: jenkins/jenkins
     container_name: jenkins
+    restart: always
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -18,6 +19,21 @@ services:
         delay: 5s
         max_attempts: 3
         window: 10s
+  
+  # Gitlab image (host source code, versionning etc)
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    volumes:
+      - './gitlab:/etc/gitlab'
+      - 'gitlab-logs:/var/log/gitlab'
+      - 'gitlab-data:/var/opt/gitlab'
 
 volumes:
-  jenkins-data:
+  gitlab-logs:
+  gitlab-data:
