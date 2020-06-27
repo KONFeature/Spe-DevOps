@@ -34,6 +34,21 @@ services:
       - 'gitlab-logs:/var/log/gitlab'
       - 'gitlab-data:/var/opt/gitlab'
 
+  # SonarQube images (quality gates, security check)
+  sonarqube:
+    image: sonarqube
+    container_name: sonar
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - './sonar/conf:/opt/sonarqube/conf'
+      - './sonar/data:/opt/sonarqube/data'
+      - 'sonar-extensions:/opt/sonarqube/extensions'
+      - 'sonar-plugins:/opt/sonarqube/lib/bundled-plugins'
+
 volumes:
   gitlab-logs:
   gitlab-data:
+  sonar-extensions:
+  sonar-plugins:

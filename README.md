@@ -28,8 +28,19 @@ Unlock password : '788f720a425c4b668e65f2657ebfac3a'
  - User : 280797SpeDevOps
  - Pass : SuperStrongPassword
 
-
 ## Gitlab
 
  - User : root
  - Pass : SuperStrongPassword
+
+## SonarQube
+
+ - User : admin
+ - Pass : admin
+
+
+## Analysis of the solution
+
+### Criticism
+
+For a production environment, SonarQube will need a separate databse (by default it's using an embeded H2 database). 
