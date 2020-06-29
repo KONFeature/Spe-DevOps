@@ -25,9 +25,7 @@ When the two stacks are op with docker-compose, run it with kubernetes with the 
 
 ### Jenkins
 
-Unlock password : '788f720a425c4b668e65f2657ebfac3a'
-
-#### Admin user
+ - Unlock password : '788f720a425c4b668e65f2657ebfac3a'
 
  - User : 280797SpeDevOps
  - Pass : SuperStrongPassword
@@ -41,6 +39,11 @@ Unlock password : '788f720a425c4b668e65f2657ebfac3a'
 
  - User : admin
  - Pass : admin
+
+### Nexus3
+
+ - User : admin
+ - Pass : SuperStrongPassword
 
 ## App part
 
