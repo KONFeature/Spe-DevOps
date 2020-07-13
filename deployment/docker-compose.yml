@@ -2,43 +2,72 @@ version: "3.8"
 
 services:
   # Jenkins imqge (Build artifact, send them to sonar, and to nexus, maybe triggered by gitlab ?)
-  jenkins:
-    image: jenkins/jenkins
-    container_name: jenkins
-    restart: always
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - ./jenkins:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/local/bin/docker:/usr/local/bin/docker
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 10s
+  # jenkins:
+  #   image: jenkins/jenkins
+  #   container_name: jenkins
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #     - "50000:50000"
+  #   volumes:
+  #     - ./jenkins:/var/jenkins_home
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /usr/local/bin/docker:/usr/local/bin/docker
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 3
+  #       window: 10s
   
   # Gitlab image (host source code, versionning etc)
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     container_name: gitlab
-    restart: always
+    restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
-      - '22:22'
+      - '2222:22'
+      - '4567:4567'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        external_url 'http://gitlab'
+        registry_external_url 'http://gitlab:4567'          
+        registry['enable'] = true
+        nginx['enable'] = true
+        nginx['redirect_http_to_https'] = true
+        puma['enable'] = false
+        unicorn['enable'] = true
+        unicorn['socket'] = '/opt/gitlab/var/unicorn/gitlab.socket'
     volumes:
       - './gitlab:/etc/gitlab'
       - 'gitlab-logs:/var/log/gitlab'
       - 'gitlab-data:/var/opt/gitlab'
+    networks:
+      - gitlab-network
+
+  # GitLab runner (to execute gitlab pipeline job)
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    volumes:
+      - './gitlab-runner:/etc/gitlab-runner:Z'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - gitlab-network
+  
+  
 
   # SonarQube images (quality gates, security check)
   sonarqube:
     image: sonarqube
     container_name: sonar
-    restart: always
+    restart: unless-stopped
     ports:
       - '9000:9000'
     volumes:
@@ -51,14 +80,30 @@ services:
   nexus:
     image: sonatype/nexus3
     container_name: nexus
-    restart: always
+    restart: unless-stopped
     ports:
       - '8081:8081'
     volumes:
       - './nexus:/nexus-data'
+
+  # Java (Host server)
+  # java-server:
+  #   build: ./images/java-server
+  #   container_name: java
+  #   restart: always
+  #   ports:
+  #     - '8083:80'
+  #     - '8022:22'
+  #   volumes:
+  #     - './java:/usr/src'
 
 volumes:
   gitlab-logs:
   gitlab-data:
   sonar-extensions:
   sonar-plugins:
+
+networks:
+  gitlab-network:
+    name: gitlab-network
+    

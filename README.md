@@ -40,18 +40,40 @@ When the two stacks are op with docker-compose, run it with kubernetes with the 
  - User : admin
  - Pass : admin
 
+ - Declarated sonnar scanner on Jenkins : sonarscanner
+ - Declareted sonar server on Jenkins : sonardemo
+
 ### Nexus3
 
  - User : admin
  - Pass : SuperStrongPassword
 
+### GitLab runner
+
+registry command : 
+
+gitlab-runner register \
+    --non-interactive \
+    --registration-token X2zmThE7tBaZvgFoacEH \
+    --locked=false \
+    --description docker-stable \
+    --url http://gitlab \
+    --executor docker \
+    --docker-image docker:stable \
+    --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+    --docker-network-mode gitlab-network
+
 ## App part
 
+### Java Server
 
-
+ - User : root
+ - Pass : SuperStrongPassword
 
 ## Analysis of the solution
 
 ### Criticism
 
 For a production environment, SonarQube will need a separate databse (by default it's using an embeded H2 database). 
+
+Only one user / group was created on each environment, if we want a cleaner solutions we need to create a user for each plateform (On gitlab / sonar / nexus, a user dedicated to Jenkins and to the project groupment)
