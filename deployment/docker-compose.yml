@@ -1,26 +1,8 @@
 version: "3.8"
 
 services:
-  # Jenkins imqge (Build artifact, send them to sonar, and to nexus, maybe triggered by gitlab ?)
-  # jenkins:
-  #   image: jenkins/jenkins
-  #   container_name: jenkins
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #     - "50000:50000"
-  #   volumes:
-  #     - ./jenkins:/var/jenkins_home
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - /usr/local/bin/docker:/usr/local/bin/docker
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 3
-  #       window: 10s
-  
-  # Gitlab image (host source code, versionning etc)
+    
+  # Gitlab image (host source code, handle pipeline to test, upload and deploy)
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     container_name: gitlab
@@ -60,8 +42,6 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - gitlab-network
-  
-  
 
   # SonarQube images (quality gates, security check)
   sonarqube:
@@ -75,6 +55,8 @@ services:
       - './sonar/data:/opt/sonarqube/data'
       - 'sonar-extensions:/opt/sonarqube/extensions'
       - 'sonar-plugins:/opt/sonarqube/lib/bundled-plugins'
+    networks:
+      - gitlab-network
 
   # Nexus (Host builded images)
   nexus:
@@ -85,6 +67,8 @@ services:
       - '8081:8081'
     volumes:
       - './nexus:/nexus-data'
+    networks:
+      - gitlab-network
 
   # Java (Host server)
   # java-server:
