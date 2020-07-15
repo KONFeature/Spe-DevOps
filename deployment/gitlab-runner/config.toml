@@ -6,8 +6,8 @@ check_interval = 0
 
 [[runners]]
   name = "docker-stable"
-  url = "http://gitlab"
-  token = "3ciUbA6J1qFDjCwH9ymJ"
+  url = "https://gitlab"
+  token = "Xhazx1xN3J1EVrqvkmVy"
   executor = "docker"
   [runners.custom_build_dir]
   [runners.cache]
@@ -21,5 +21,5 @@ check_interval = 0
     oom_kill_disable = false
     disable_cache = false
     volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
-    network_mode = "gitlab-network"
+    network_mode = "deployment-network"
     shm_size = 0

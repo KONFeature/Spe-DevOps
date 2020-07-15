@@ -24,6 +24,7 @@ When the two stacks are op with docker-compose, run it with kubernetes with the 
 
  - User : root
  - Pass : SuperStrongPassword
+ - Ci token (for registry) : iaftgrnFh2XuXBWpa11L
 
 ### SonarQube
 
@@ -41,14 +42,14 @@ registry command :
 
 gitlab-runner register \
     --non-interactive \
-    --registration-token X2zmThE7tBaZvgFoacEH \
+    --registration-token JC2udrWykxqwxoebN3PE \
     --locked=false \
     --description docker-stable \
-    --url http://gitlab \
+    --url https://gitlab \
     --executor docker \
     --docker-image docker:stable \
     --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
-    --docker-network-mode gitlab-network
+    --docker-network-mode deployment-network
 
 ## App part
 

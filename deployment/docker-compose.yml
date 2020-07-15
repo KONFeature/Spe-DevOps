@@ -15,8 +15,8 @@ services:
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
-        external_url 'http://gitlab'
-        registry_external_url 'http://gitlab:4567'          
+        external_url 'https://gitlab'
+        registry_external_url 'https://gitlab:4567'          
         registry['enable'] = true
         nginx['enable'] = true
         nginx['redirect_http_to_https'] = true
@@ -28,7 +28,7 @@ services:
       - 'gitlab-logs:/var/log/gitlab'
       - 'gitlab-data:/var/opt/gitlab'
     networks:
-      - gitlab-network
+      - deployment-network
 
   # GitLab runner (to execute gitlab pipeline job)
   gitlab-runner:
@@ -41,7 +41,7 @@ services:
       - './gitlab-runner:/etc/gitlab-runner:Z'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
-      - gitlab-network
+      - deployment-network
 
   # SonarQube images (quality gates, security check)
   sonarqube:
@@ -56,7 +56,7 @@ services:
       - 'sonar-extensions:/opt/sonarqube/extensions'
       - 'sonar-plugins:/opt/sonarqube/lib/bundled-plugins'
     networks:
-      - gitlab-network
+      - deployment-network
 
   # Nexus (Host builded images)
   nexus:
@@ -68,18 +68,7 @@ services:
     volumes:
       - './nexus:/nexus-data'
     networks:
-      - gitlab-network
-
-  # Java (Host server)
-  # java-server:
-  #   build: ./images/java-server
-  #   container_name: java
-  #   restart: always
-  #   ports:
-  #     - '8083:80'
-  #     - '8022:22'
-  #   volumes:
-  #     - './java:/usr/src'
+      - deployment-network
 
 volumes:
   gitlab-logs:
@@ -88,6 +77,6 @@ volumes:
   sonar-plugins:
 
 networks:
-  gitlab-network:
-    name: gitlab-network
+  deployment-network:
+    name: deployment-network
     
