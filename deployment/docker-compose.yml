@@ -39,6 +39,7 @@ services:
       - gitlab
     volumes:
       - './gitlab-runner:/etc/gitlab-runner:Z'
+      - './gitlab/ssl:/etc/gitlab-runner/certs' # Share certificate between gitlab and gitlab runner
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - deployment-network
