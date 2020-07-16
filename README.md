@@ -5,20 +5,15 @@ By Quentin Nivelais, for the devops option at Supinfo, idbooster : 280797
 
 ## Strategy
 
-Create the complete dployment stack on docker with :
+Create the complete deployment stack on docker with :
 
 - Gitlab (Code hosting, pipeline to build, test and transfer artifact)
 - SonarQube (Code quality analysis, OWASP analysis for security purpose)
 - Nexus (Host builded artifect, and send them to the client)
 
-Create the complete app stack on docker with :
+To use the docker compose file into kubernetes we can use the tool 'Kompose'.
 
-- Prometheus (Monitoring)
-- Fluentd (Logging collector)
-
-When the two stacks are op with docker-compose, run it with kubernetes with the help of the tool 'Kompose'.
-
-## Deployment part
+## Deployment servers
 
 ### Gitlab
 
@@ -51,13 +46,6 @@ gitlab-runner register \
     --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
     --docker-network-mode deployment-network
 
-## App part
-
-### Java Server
-
- - User : root
- - Pass : SuperStrongPassword
-
 ## Analysis of the solution
 
 ### Criticism
@@ -66,7 +54,7 @@ For a production environment, SonarQube will need a separate databse (by default
 
 Only one user / group was created on each environment, if we want a cleaner solutions we need to create a user for each plateform (On gitlab / sonar / nexus, a user dedicated to Jenkins and to the project groupment)
 
-## What have i done
+### What have i done
 
 I firstly tried to setup a CI/CD environment using gitlab for code hosting, jenkins for pipeline managment, sonar for testing and nexus for artifact hosting.
 I've got a lot of trouble running all this stack of my computer, so i decided to remove the Jenkins part and handle the pipeline on the gitlab server.
