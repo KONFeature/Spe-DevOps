@@ -1,0 +1,103 @@
+image: docker:latest
+services:
+  - docker:dind
+
+variables:
+  # Utils variables
+  DOCKER_DRIVER: overlay
+  GIT_DEPTH: 0
+  # Maven variables
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+stages:
+  - build
+  - test
+  - package
+  - upload
+  - deploy
+
+# Compile the code
+maven-build:
+  image: maven:3-jdk-8
+  stage: build
+  script:
+    - echo "Compiling the code"
+    - mvn clean compile
+    - echo "Compiled the code"
+
+# Test and analyse it with sonarqube
+sonar-test:
+  image: maven:3-jdk-8
+  stage: test
+  script:
+    - echo "Testing the code on sonarqube"
+    - mvn $MAVEN_CLI_OPTS verify sonar:sonar -Dsonar.qualitygate.wait=true
+    - echo "Tested the code on sonarqube"
+
+# Simple maven test (run all the TU)
+maven-test:
+  image: maven:3-jdk-8
+  stage: test
+  script:
+    - echo "Testing the code zith maven"
+    - mvn $MAVEN_CLI_OPTS test
+    - echo "Tested the code zith maven"
+
+# Package the code
+maven-package:
+  image: maven:3-jdk-8
+  stage: package
+  script:
+    - echo "Packaging the code, skipping the test"
+    - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
+    - echo "Packaged the code"
+  artifacts:
+    paths:
+      - target/*.jar
+
+# Upload the packaged code to nexus
+maven-upload-nexus:
+  image: maven:3-jdk-8
+  stage: upload
+  script:
+    - echo "Uploading the package to nexus"
+    - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true
+    - echo "Uploaded the package to nexus"
+  allow_failure: true # Allow this job to fail because sometime the nexus isn't op
+
+# Upload the packaged code and dockerfile to gitlab repository
+docker-upload-gitlab:
+  stage: upload
+  script:
+    - echo "Uploading to Gitlab registry"
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY_BASE_URL
+    - docker build -t $CI_REGISTRY_URL .
+    - docker push $CI_REGISTRY_URL
+    - echo "Uploaded to Gitlab registry"
+
+# Deploy to google cloud kubernetes
+deploy-gcloud-kubernetes:
+  image: google/cloud-sdk:300.0.0
+  stage: deploy
+  script:
+    - echo "$GOOGLE_KEY" > key.json
+    - gcloud auth activate-service-account --key-file key.json
+    - gcloud config set compute/zone europe-west1-c
+    - gcloud config set project cicd-demo-283418
+    - gcloud config set container/use_client_certificate False # Was at true
+    - gcloud container clusters get-credentials spboot-cicd-demo
+    - kubectl delete secret gitlab
+    - kubectl create secret docker-registry gitlab --docker-server=https://gitlab:4567 --docker-username=root --docker-password=$REGISTRY_PASSWD --docker-email=quentin@nivelais.com
+    - kubectl apply -f deployment.yml
+
+# Deploy to local docker exposing port 8080
+#deploy-local-docker:
+#  stage: deploy
+#  script:
+#    - docker run $CI_REGISTRY_URL -p 8080:8080

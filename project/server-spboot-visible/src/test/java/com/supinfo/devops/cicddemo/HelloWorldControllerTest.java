@@ -1,0 +1,20 @@
+package com.supinfo.devops.cicddemo;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+@SpringBootTest
+public class HelloWorldControllerTest {
+
+    @Autowired
+    private HelloWorldController controller;
+
+    @Test
+    public void contexLoads() throws Exception {
+        assertThat(controller).isNotNull();
+    }
+
+}

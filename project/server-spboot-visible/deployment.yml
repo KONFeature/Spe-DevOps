@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: spboot-cicd-demo
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: spboot-cicd-demo
+    spec:
+      containers:
+        - name: spboot-cicd-demo
+          image: gitlab:4567/root/serverspboot
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: gitlab
